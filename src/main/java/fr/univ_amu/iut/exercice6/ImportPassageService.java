@@ -10,14 +10,21 @@ import java.util.List;
 import javax.sql.DataSource;
 
 /**
- * Service d'import d'un passage et de ses observations (exercice 6) : illustration des
+ * Service d'import d'un passage et de ses observations (exercice 6) :
+ * illustration des
  * <b>transactions</b>.
  *
- * <p>Importer un passage et ses observations, c'est plusieurs écritures (un {@code INSERT} dans
- * {@code passage}, puis un {@code INSERT} par observation). Il faut que ce soit <b>tout ou rien</b>
- * : si une observation échoue (par exemple parce que son taxon n'existe pas), on ne veut pas d'un
- * passage à moitié importé. C'est le rôle d'une transaction : on désactive l'auto-commit, on
- * exécute toutes les écritures, on {@code commit()} à la fin ; au moindre problème, on {@code
+ * <p>
+ * Importer un passage et ses observations, c'est plusieurs écritures (un
+ * {@code INSERT} dans
+ * {@code passage}, puis un {@code INSERT} par observation). Il faut que ce soit
+ * <b>tout ou rien</b>
+ * : si une observation échoue (par exemple parce que son taxon n'existe pas),
+ * on ne veut pas d'un
+ * passage à moitié importé. C'est le rôle d'une transaction : on désactive
+ * l'auto-commit, on
+ * exécute toutes les écritures, on {@code commit()} à la fin ; au moindre
+ * problème, on {@code
  * rollback()} pour tout annuler.
  */
 public class ImportPassageService {
@@ -69,15 +76,17 @@ public class ImportPassageService {
     //
     // Astuce : ouvrez la connexion AVANT le try afin de pouvoir faire rollback dans
     // le catch.
-    Connection connexion = source.getConnection();
-    connexion.setAutoCommit(false);
-    try (PreparedStatement ps =
-        connexion.prepareStatement(sqlPassage, Statement.RETURN_GENERATED_KEYS)) {
+    Connection connexion = null;
+    try (connexion = source.getConnection();
+        connexion.setAutoCommit(false);
+        PreparedStatement ps = connexion.prepareStatement(sqlPassage, Statement.RETURN_GENERATED_KEYS)){
       ps.setString(1, numeroCarre);
       ps.setString(2, codePoint);
       ps.setString(3, String.valueOf(numeroPassage));
       ps.setString(4, String.valueOf(annee));
       ps.executeUpdate();
+
+      ResultSet keys = ps.getGeneratedKeys();
 
       while (keys.next()) passageId = keys.getLong(1);
     } catch (SQLException e) {
@@ -87,7 +96,10 @@ public class ImportPassageService {
     return passageId;
   }
 
-  /** Nombre de passages en base (fourni, utile pour vérifier qu'un rollback a bien tout annulé). */
+  /**
+   * Nombre de passages en base (fourni, utile pour vérifier qu'un rollback a bien
+   * tout annulé).
+   */
   public int nombrePassages() {
     try (Connection connexion = source.getConnection();
         PreparedStatement ps = connexion.prepareStatement("SELECT COUNT(*) FROM passage");
