@@ -1,6 +1,7 @@
 package fr.univ_amu.iut.exercice6;
 
 import fr.univ_amu.iut.jdbc.DataAccessException;
+import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,19 +52,37 @@ public class ImportPassageService {
 
     long passageId = -1;
 
-    // TODO exercice 6 : réaliser l'import dans une transaction et renseigner `passageId`.
+    // TODO exercice 6 : réaliser l'import dans une transaction et renseigner
+    // `passageId`.
     //
     // 1. Ouvrir une connexion, puis connexion.setAutoCommit(false).
     // 2. Dans un try :
-    //    - insérer le passage (prepareStatement(sqlPassage, Statement.RETURN_GENERATED_KEYS),
-    //      positionner les paramètres, executeUpdate) ;
-    //    - récupérer l'id généré : keys.next(); passageId = keys.getLong(1) ;
-    //    - pour chaque observation, l'insérer avec ce passageId ;
-    //    - connexion.commit().
-    // 3. catch (SQLException) : connexion.rollback() puis lever une DataAccessException.
+    // - insérer le passage (prepareStatement(sqlPassage,
+    // Statement.RETURN_GENERATED_KEYS),
+    // positionner les paramètres, executeUpdate) ;
+    // - récupérer l'id généré : keys.next(); passageId = keys.getLong(1) ;
+    // - pour chaque observation, l'insérer avec ce passageId ;
+    // - connexion.commit().
+    // 3. catch (SQLException) : connexion.rollback() puis lever une
+    // DataAccessException.
     // 4. finally : refermer la connexion.
     //
-    // Astuce : ouvrez la connexion AVANT le try afin de pouvoir faire rollback dans le catch.
+    // Astuce : ouvrez la connexion AVANT le try afin de pouvoir faire rollback dans
+    // le catch.
+    Connection connexion = source.getConnection();
+    connexion.setAutoCommit(false);
+    try (PreparedStatement ps =
+        connexion.prepareStatement(sqlPassage, Statement.RETURN_GENERATED_KEYS)) {
+      ps.setString(1, numeroCarre);
+      ps.setString(2, codePoint);
+      ps.setString(3, String.valueOf(numeroPassage));
+      ps.setString(4, String.valueOf(annee));
+      ps.executeUpdate();
+
+      while (keys.next()) passageId = keys.getLong(1);
+    } catch (SQLException e) {
+      throw new DataAccessException("erreur", e);
+    }
 
     return passageId;
   }
