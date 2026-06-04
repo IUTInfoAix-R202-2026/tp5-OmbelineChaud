@@ -50,14 +50,17 @@ public class SitesController {
     colProtocole.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().protocole()));
 
     // 2. Donner ses items à la TableView : setItems + viewModel.sitesProperty().
-    tableSites.getItems().setAll(viewModel.sitesProperty());
+    tableSites.setItems(viewModel.sitesProperty());
     // 3. Lier le texte de labelResume au resumeProperty() du ViewModel.
     labelResume.textProperty().bind(viewModel.resumeProperty());
     // 4. Remplir choiceProtocole avec les deux protocoles ("PointFixeStandard",
     // "PointFixeRecherche").
-
+    choiceProtocole.getItems().addAll("PointFixeStandard", "PointFixeRecherche");
     // 5. Désactiver boutonSupprimer tant qu'aucune ligne n'est sélectionnée
     // (disableProperty lié à selectedItemProperty().isNull() du selection model).
+    boutonSupprimer
+        .disableProperty()
+        .bind(tableSites.getSelectionModel().selectedItemProperty().isNull());
   }
 
   @FXML
