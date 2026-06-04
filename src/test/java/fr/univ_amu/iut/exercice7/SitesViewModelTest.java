@@ -57,7 +57,8 @@ class SitesViewModelTest {
   @Disabled("Retire cette annotation pour activer le test")
   @Test
   void supprimer_retire_le_site_de_la_liste_et_de_la_base() {
-    // On supprime un site sans données rattachées (le site seedé 640380 a un point d'écoute,
+    // On supprime un site sans données rattachées (le site seedé 640380 a un point
+    // d'écoute,
     // et l'intégrité référentielle empêcherait sa suppression).
     Site jetable = new Site("999999", "Site jetable", "PointFixeStandard", null, "2026-05-02");
     vm.ajouterCommand(jetable);
