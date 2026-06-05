@@ -35,6 +35,7 @@ class SitesControllerTest {
     return robot.lookup("#tableSites").queryAs(TableView.class);
   }
 
+  @Disabled("Retire cette annotation pour activer le test")
   @Test
   void le_tableau_affiche_les_sites_persistes(FxRobot robot) {
     assertThat(table(robot).getItems())
